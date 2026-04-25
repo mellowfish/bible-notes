@@ -1,0 +1,24 @@
+---
+type: event
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+aliases: []
+tags: []
+when:
+where:
+participants: []
+---
+
+# Event Name
+
+> One-sentence summary.
+
+## Key passages
+
+-
+
+## What happened
+
+## Significance
+
+## Open questions

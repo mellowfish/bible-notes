@@ -1,0 +1,35 @@
+.DS_Store
+Thumbs.db
+
+# Obsidian config — Phase 1 is single-machine; Obsidian regenerates this on first open.
+# Snippets ship from tools/snippets/ and are copied here at vault-setup time.
+# Revisit when running on multiple machines.
+vault/.obsidian/
+
+# Personal vault operating manual — copied from vault/_templates/CLAUDE.md on first setup;
+# user-edited thereafter. Tracked starter is in vault/_templates/.
+vault/CLAUDE.md
+
+# Claude Code per-machine state
+.claude/
+
+# Importer (TS) build artifacts
+tools/node_modules/
+tools/dist/
+tools/.env
+
+# Raw source data — re-downloadable from upstream; URL recorded in docs/planning/DECISIONS.md
+data/
+
+# Generated Bible text — regenerated via tools/import-usfm.ts; see DECISIONS D10
+vault/bible/
+
+# Personal study notes — backed up via Obsidian Sync, not git; see DECISIONS D10
+# (.gitkeep files in each subdir preserve the structure on a fresh clone)
+vault/notes/*/*.md
+
+# Editor scratch
+*.swp
+*.swo
+.vscode/
+.idea/
