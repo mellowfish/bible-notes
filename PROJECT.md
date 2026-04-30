@@ -100,8 +100,25 @@ before committing to building UI around it.
 - Documented vault conventions (CLAUDE.md, template files, frontmatter
   schemas, naming rules, link syntax)
 - A reading prep prompt/workflow that I run daily
-- 2-4 weeks of actual usage data
-- Decision document: ship to Phase 2, iterate on Phase 1, or abandon
+- Enough actual usage data to know whether the workflow has changed
+  reading behavior (long enough that early novelty wears off and routine
+  sets in)
+- Decision document: ship to Phase 1.5, iterate on Phase 1, or abandon
+
+## Phase 1.5: Obsidian Plugin (push the laptop+Obsidian setup as far as possible)
+
+**Goal**: before committing to Phase 2's app + sync build, find out how much
+of the friction can be removed by a focused Obsidian plugin (verse picker +
+link helper, Strong's popover, inline-note indicators, auto reader-mode for
+chapter files). Mobile parity is a target — Phase 1's audio + dictation
+workflow runs on Obsidian Mobile.
+
+**Hard guardrail (D24)**: the plugin enhances the vault format; it does not
+change it. Format changes go through `docs/planning/DECISIONS.md` first.
+
+**Phase 1.5 outcome may shrink Phase 2's scope.** If the plugin delivers
+enough on its own, Phase 2 could narrow to "sync only" or shift entirely.
+See `docs/planning/phase-1-5.md` for the working detail.
 
 ## Phase 2: iOS/macOS App + Sync Server
 

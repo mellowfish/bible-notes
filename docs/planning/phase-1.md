@@ -1,7 +1,7 @@
 ---
 created: 2026-04-24
-updated: 2026-04-25
-status: active — Phase 1.0 importer implementation
+updated: 2026-04-28
+status: active — Phase 1.1 daily-use validation underway (cadence is slow; real life crowding reading time)
 ---
 
 # Phase 1 — Working Document
@@ -25,37 +25,41 @@ For canonical references, see (in this order):
 - Vault skeleton: type-folder structure with `.gitkeep` markers; vault format spec + AI defaults at `vault/_templates/CLAUDE.md` (tracked starter; copied to `vault/CLAUDE.md` per D12)
 - Project/tooling AI operating manual at `CLAUDE.md` (root) per D12
 - Templates: `_templates/{person,place,concept,event,reading}-template.md`
-- Locked decisions D1–D12 in `DECISIONS.md`
+- Locked decisions D1–D13 in `DECISIONS.md`
 - BSB USFM bundle sourced into `data/usfm/BSB/` (66 books + license/metadata)
+- **USFM importer** (`tools/import-usfm.ts`): hand-rolled per D13 after `usfm-grammar` failed on the BSB Psalms; emits chapter markdown + sidecar Strong's JSON per D11. Validated on Gen 1, Psa 23, Psa 119, Eph 5–6.
+- **Bulk import:** all 66 BSB books (1,189 chapters) generated under `vault/bible/`.
+- **CSS snippet** at `tools/snippets/bible-flow.css`, scoped via `cssclasses: [bible-flow]` frontmatter the importer writes.
+- **Reading-prep prompt** at `tools/prompts/reading-prep.md`.
+- **Vault setup wiring:** `tools/setup-vault.ts` copies `vault/_templates/CLAUDE.md` → `vault/CLAUDE.md` and the CSS snippet into `vault/.obsidian/snippets/` on first run; `tools/import-usfm.ts` invokes it on every import (idempotent — skips files already present).
+- **Test suite:** `tools/import-usfm.test.ts` with 28 vitest tests covering tokenizer, linkifier, multi-paragraph verses, footnote tightness, omitted verses, poetry, acrostic, frontmatter, and Strong's sidecar alignment.
 
-**In progress:**
-- **USFM importer** (`tools/import-usfm.ts`): format decisions locked in `DECISIONS.md` D11 (2026-04-25); documentation layering in D12 (supersedes D9). Direction is pure-markdown chapter files + sidecar JSON for Strong's + Obsidian CSS snippet for verse-paragraph flow. Implementation next.
+**In progress (Phase 1.1):**
+- Daily reading prep + note capture — three daily notes in `vault/notes/readings/` (2026-04-26 through 2026-04-28); cadence is slow, working as time allows
+- Friction journal at `vault/notes/_meta/Friction Journal.md` (gitignored, raw capture)
+- Distilled wins/friction at `docs/planning/phase-1-journal.md` (committed)
 
 **Not yet started:**
-- Importer validation on Gen 1 / Psalm 119 / Eph 5–6
-- Bulk import all 66 books
-- Bible-flow CSS snippet at `tools/snippets/bible-flow.css` (copied to `vault/.obsidian/snippets/` at vault-setup time)
-- Daily reading-prep prompt at `tools/prompts/reading-prep.md`
-- Vault-setup wiring (importer or `tools/setup-vault.ts`): copy `vault/_templates/CLAUDE.md` → `vault/CLAUDE.md` and CSS snippet to `.obsidian/snippets/` if missing
-- First end-to-end reading-prep run
+- Mid-period checkpoint
+- Phase 1 retrospective (the deliverable: ship to Phase 2 / iterate / abandon)
 
 ---
 
 ## Format decisions — locked
 
-All seven D11 sub-decisions are resolved in `DECISIONS.md` D11 (2026-04-25). Summary:
+All seven D11 sub-decisions are resolved in `DECISIONS.md` D11 (2026-04-25). Parser choice amended by D13 (2026-04-25). Summary:
 
 | # | Decision | Resolution |
 |---|---|---|
 | D11.1 | Strong's numbers | sidecar JSON at `vault/bible/{Book}/{NN}_strongs.json` |
 | D11.2 | Translator footnotes | markdown `[^N]` footnotes; bible refs inside become wiki-links |
 | D11.3 | Parallel refs (`\r`) | italic "*See also: …*" line of wiki-links under section heading |
-| D11.4 | Verse anchors | per-verse paragraph blocks + CSS snippet for margin-collapse |
+| D11.4 | Verse anchors | per-verse paragraph blocks + CSS snippet for margin-collapse (paragraph-type comments dropped, see D14) |
 | D11.5 | Poetry indentation | blockquote nesting (`>`/`>>`/`>>>`) |
-| D11.6 | Acrostic letters | `**ALEPH**` on its own line |
+| D11.6 | Acrostic letters | `#### LETTER` h4 heading (per D15, was `**LETTER**`) |
 | D11.7 | `\it` italics | markdown `*word*` (project-wide: `*` not `_`) |
 
-Plus: paragraph-type HTML comments (`<!-- p:m -->`, `<!-- p:pmo -->`) preserved for Phase 2 renderer; CSS snippet shipped from `tools/snippets/bible-flow.css` (copied to `vault/.obsidian/snippets/` at setup); reading-prep prompt at `tools/prompts/reading-prep.md` (per D12, code-adjacent not vault-adjacent); tools/ uses npm + TypeScript ESM + `usfm-grammar` parser.
+Plus: paragraph-type HTML comments dropped per D14 (Obsidian doesn't hide them in reading view, and per-verse paragraphs multiplied them 3–5×); if Phase 2 needs paragraph metadata, the importer re-derives it from the USFM source. CSS snippet shipped from `tools/snippets/bible-flow.css` (copied to `vault/.obsidian/snippets/` at setup); reading-prep prompt at `tools/prompts/reading-prep.md` (per D12, code-adjacent not vault-adjacent); tools/ uses npm + TypeScript ESM with a hand-rolled line-based USFM parser (per D13).
 
 ---
 
@@ -112,6 +116,8 @@ book: Gen
 book_name: Genesis
 chapter: 1
 total_verses: 31
+cssclasses:
+  - bible-flow
 ---
 
 # Genesis 1
@@ -120,24 +126,18 @@ total_verses: 31
 
 *See also: [[bible/Jhn/01#^v1|John 1:1–5]] · [[bible/Heb/11#^v1|Hebrews 11:1–3]]*
 
-<!-- p:m -->
 **¹** In the beginning God created the heavens and the earth. ^v1
 
-<!-- p:m -->
 **²** Now the earth was formless and void, and darkness was over the surface of the deep. And the Spirit of God was hovering over the surface of the waters. ^v2
 
 ### The First Day
 
-<!-- p:pmo -->
 **³** And God said, "Let there be light,"[^1] and there was light. ^v3
 
-<!-- p:pmo -->
 **⁴** And God saw that the light was good, and He separated the light from the darkness. ^v4
 
-<!-- p:pmo -->
 **⁵** God called the light "day," and the darkness He called "night."
 
-<!-- p:pmo -->
 And there was evening, and there was morning—the first day.[^2] ^v5
 
 …
@@ -155,6 +155,8 @@ book: Psa
 book_name: Psalms
 chapter: 23
 total_verses: 6
+cssclasses:
+  - bible-flow
 ---
 
 # Psalm 23
@@ -165,12 +167,12 @@ total_verses: 6
 
 *A Psalm of David.*
 
-<!-- p:q1 -->
 > **¹** The LORD is my shepherd;[^1]
+
 >> I shall not want. ^v1
 
-<!-- p:q1 -->
 > **²** He makes me lie down in green pastures;
+
 >> He leads me beside quiet waters. ^v2
 
 …
@@ -217,11 +219,10 @@ total_verses: 6
 | `\mr range` | italic line under heading |
 | `\r (refs)` | `*See also: [[wiki-links]]*` (D11.3) |
 | `\d superscription` | `*italic superscription*` (Psalm headings, part of canonical text) |
-| `\m`, `\pmo`, `\pc`, `\pi*`, `\nb` | new paragraph; type recorded as `<!-- p:{type} -->` HTML comment above the paragraph |
+| `\m`, `\pmo`, `\pc`, `\pi*`, `\nb` | new paragraph (paragraph-type HTML comments dropped per D14) |
 | `\b` | paragraph separator (blank line) |
-| `\q1`, `\q2`, `\q3`, `\qr` | blockquote nesting (`> ` / `>> ` / `>>> `); paragraph type recorded as `<!-- p:q{N} -->` |
-| `\qa LETTER` | `**LETTER**` on its own line (Psalm 119 acrostic markers) |
-| `\d superscription` | `*A Psalm of David.*` (italic, `*` form per project convention) |
+| `\q1`, `\q2`, `\q3`, `\qr` | blockquote nesting (`> ` / `>> ` / `>>> `) |
+| `\qa LETTER` | `#### LETTER` h4 heading (Psalm 119 acrostic markers, per D15) |
 | `\v N` | verse marker `**N (Unicode superscript)**` at start of verse paragraph(s); `^vN` block-ref at end of last paragraph of the verse |
 | `\w word\|strong="…"\w*` | strip markup; emit just the word; record `(verse, word_index, strong)` to sidecar JSON |
 | `\f + \fr ref \ft text \f*` | markdown footnote: `[^N]` inline, `[^N]: text` at file end. Bible refs in `\ft` text become wiki-links. |
@@ -230,9 +231,9 @@ total_verses: 6
 
 ### Parser library
 
-Use `usfm-grammar` (npm) — actively maintained, Node-native, handles USFM 2.x and 3.x. Alternative is `proskomma`, but it's heavier (full Bible-graph engine) than we need for one-shot import.
+Hand-rolled line-based scanner inside `tools/import-usfm.ts` (per D13, which amends D11). `usfm-grammar` was tried first per D11 and threw on the BSB Psalms file at `\q1\n\v` boundaries at both `LEVEL.STRICT` and `LEVEL.RELAXED`. Closed BSB marker set + paragraph-precise output requirement made a focused scanner the cheaper path than fighting the grammar.
 
-Package manager: npm (per D11 tooling section).
+Package manager: npm. Dependencies are stdlib-only at this point — `tsx` for dev runs and `typescript` for typecheck.
 
 ### Importer CLI shape
 
@@ -262,11 +263,11 @@ After all three look right, run on the full 66 books and spot-check 5–10 rando
 
 ## After the importer — Phase 1.0 closeout
 
-1. **Daily reading-prep prompt** at `tools/prompts/reading-prep.md` (D11 + D12). Takes a passage reference, generates `notes/readings/YYYY-MM-DD-{slug}.md` from `_templates/reading-template.md`. Eagerly creates entity stubs per D5. Surfaces existing cross-refs by searching `vault/notes/` for inbound links to the passage.
+1. **Daily reading-prep prompt** at `tools/prompts/reading-prep.md` (D11 + D12 + D16 + D21). Accepts one or more passages; fills the user's date-named daily note at `notes/readings/YYYY-MM-DD (Day).md` (the Calendar plugin keys on filename per D16) with per-passage subsections — `### Entities` (AI) and `### Notes` (user) per D21. Eagerly creates entity stubs per D5/D22. Surfaces user-side connections by searching `vault/notes/` for inbound links to any of the day's passages.
 
 2. **First end-to-end run** on a real passage. Iterate the prompt before declaring it "daily-ready."
 
-3. **Friction journal:** start a `vault/notes/_journal/` directory (gitignored same as other notes) for "I wish it could…" capture during Phase 1.1 daily use.
+3. **Journals:** `vault/notes/_meta/Friction Journal.md` (gitignored) for raw "I wish it could…" capture during Phase 1.1 daily use; `docs/planning/phase-1-journal.md` (committed) for distilled wins and friction observations that will feed the Phase 1 → Phase 2 decision.
 
 ---
 
@@ -275,9 +276,9 @@ After all three look right, run on the full 66 books and spot-check 5–10 rando
 If you (or a fresh Claude session) come back to this cold:
 
 1. Read `PROJECT.md` for vision/scope.
-2. Read `DECISIONS.md` for what's locked (D1–D12 today).
+2. Read `DECISIONS.md` for what's locked (D1–D16 today).
 3. Read this file (`phase-1.md`) for current state and pending work.
 4. Read `CLAUDE.md` (root) for project/tooling conventions and `vault/_templates/CLAUDE.md` for vault format spec.
-5. **Next concrete action:** implement `tools/import-usfm.ts` per the design table and DECISIONS D11; ship `tools/snippets/bible-flow.css` and `tools/prompts/reading-prep.md`; wire up vault-setup to copy the starter CLAUDE.md and CSS snippet on first run; validate against Gen 1 / Psalm 119 / Eph 5–6.
+5. **Next concrete action:** continue daily reading at whatever cadence real life allows; capture friction in `vault/notes/_meta/Friction Journal.md` and pull distilled signal up into `docs/planning/phase-1-journal.md`. The retrospective comes when routine has set in (or when a clear ship/iterate/abandon signal emerges) — not before.
 
 The source bundle is in `data/usfm/BSB/`. Inspect freely — sample chapters cited in the design section above are the ones to look at first if anything in the marker mapping seems off.

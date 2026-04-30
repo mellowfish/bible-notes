@@ -25,8 +25,14 @@ data/
 vault/bible/
 
 # Personal study notes — backed up via Obsidian Sync, not git; see DECISIONS D10
-# (.gitkeep files in each subdir preserve the structure on a fresh clone)
-vault/notes/*/*.md
+# (.gitkeep files in each subdir preserve the structure on a fresh clone).
+# `**` matches any depth so nested folders like `notes/people/spiritual/`
+# stay ignored too — `*/*.md` would only catch one level deep.
+vault/notes/**/*.md
+
+# Vault reference data (reading plans, future Strong's lookups, etc.) — generated
+# by tools/, not committed; see DECISIONS D23.
+vault/docs/**/*.md
 
 # Editor scratch
 *.swp

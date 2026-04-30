@@ -1,0 +1,26 @@
+{
+  "name": "bible-notes-tools",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Importer + scripts for the bible-notes vault. See ../docs/planning/DECISIONS.md.",
+  "scripts": {
+    "import": "tsx import-usfm.ts",
+    "import-mcheyne": "tsx import-mcheyne.ts",
+    "setup-vault": "tsx setup-vault.ts",
+    "clean:bible": "rm -rf ../vault/bible/*",
+    "reimport": "npm run clean:bible && npm run import -- --src ../data/usfm/BSB --out ../vault/bible --translation BSB",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  }
+}

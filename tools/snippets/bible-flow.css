@@ -1,0 +1,175 @@
+/* bible-flow.css — Reading-flow polish for `vault/bible/` chapter files.
+ *
+ * Source of truth lives at `tools/snippets/bible-flow.css`; the importer
+ * copies it to `vault/.obsidian/snippets/bible-flow.css` at vault-setup time
+ * (per D11.4 / D12). Enable in Obsidian → Settings → Appearance → CSS snippets.
+ *
+ * Scoped via `cssclasses: [bible-flow]` in each chapter file's frontmatter,
+ * so user notes are unaffected.
+ *
+ * Why this exists: per D11.4 / D14, every verse is its own markdown
+ * paragraph block so each `^vN` block-ref is independently navigable.
+ * Without CSS help, prose chapters render as a stack of one-verse one-line
+ * "paragraphs" that read like a list, not like prose.
+ *
+ * How: Obsidian's reading view wraps every markdown block in a
+ * `<div class="el-{tag}">` (e.g. `el-p` for paragraphs, `el-h2` for headings,
+ * `el-blockquote` for blockquotes). We `display: inline` only the verse
+ * paragraph wrappers (`.el-p`) and leave everything else block-level — so
+ * verses flow as prose, but headings, blockquotes (poetry), and italic-only
+ * paragraphs (see-also, superscriptions) keep their own lines.
+ *
+ * Optimized for *reading view*. Live preview / source mode is a CodeMirror
+ * pane and not addressable by these selectors; chapter files are meant to
+ * be read in reading view, edited via the importer.
+ */
+
+/* ===========================================================================
+ * 1. Recompose prose: verse paragraph wrappers + their <p> flow inline.
+ * ========================================================================= */
+
+.bible-flow .el-p {
+  display: inline;
+  margin: 0;
+}
+
+.bible-flow .el-p > p {
+  display: inline;
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* Trailing space between adjacent inline verse wrappers, so the next
+ * verse's `**N**` marker doesn't mash into the previous verse's
+ * punctuation. */
+.bible-flow .el-p::after {
+  content: " ";
+  white-space: pre;
+}
+
+/* ===========================================================================
+ * 2. Re-block: italic-only paragraphs (`*See also: …*`,
+ *    `*A Psalm of David.*`) lift out of the prose flow as their own line.
+ *    The `:only-child` quirk (browsers ignore text-node siblings) is
+ *    harmless here because these paragraphs really do contain only the
+ *    <em>. Verse paragraphs always have a leading <strong>, so they don't
+ *    match this selector.
+ * ========================================================================= */
+
+.bible-flow .el-p:has(em:only-child) {
+  display: block;
+  margin-block: 0.7em 0.5em;
+}
+
+.bible-flow .el-p:has(em:only-child)::after {
+  content: none;
+}
+
+.bible-flow .el-p > p > em:only-child {
+  font-size: 0.92em;
+  color: var(--text-muted);
+}
+
+/* ===========================================================================
+ * 2b. Re-block: chapter nav paragraphs.
+ *
+ *    The importer emits a wikilink-only line (e.g. `[[…|← Genesis 49]] ·
+ *    [[…|Exodus 1 →]]`) under the H1 and after the footnotes. Verse
+ *    paragraphs always start with `<strong>`, see-also/superscriptions wrap
+ *    in `<em>` — only nav paragraphs have an internal-link <a> as the first
+ *    child. Lift them block-level so they don't reflow into the prose.
+ * ========================================================================= */
+
+.bible-flow .el-p:has(> p > a.internal-link:first-child) {
+  display: block;
+  margin-block: 0.7em 0.5em;
+}
+
+.bible-flow .el-p:has(> p > a.internal-link:first-child)::after {
+  content: none;
+}
+
+.bible-flow .el-p:has(> p > a.internal-link:first-child) > p {
+  font-size: 0.92em;
+}
+
+/* ===========================================================================
+ * 3. Headings — naturally block-level (`.el-h2`, `.el-h3`, `.el-h4` wrappers
+ *    are block by default). Just tighten spacing for chapter density.
+ * ========================================================================= */
+
+.bible-flow .markdown-rendered h2 {
+  margin-block: 1.4em 0.5em;
+}
+
+.bible-flow .markdown-rendered h3 {
+  margin-block: 1.1em 0.4em;
+  font-size: 1.05em;
+}
+
+/* Acrostic letters (Psa 119: `\qa ALEPH` → `#### ALEPH` per D15). */
+.bible-flow .markdown-rendered h4 {
+  margin-block: 1em 0.3em;
+  font-size: 0.95em;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* ===========================================================================
+ * 4. Verse markers, footnotes, block-id tails
+ * ========================================================================= */
+
+/* Verse number `**N**` at the start of a paragraph. */
+.bible-flow .markdown-rendered .el-p > p > strong:first-child {
+  color: var(--text-accent);
+  font-weight: 600;
+  margin-inline-end: 0.15em;
+}
+
+/* Footnote callers: small + superscript, but keep Obsidian's default
+ * link styling (underline + accent color) so they still look clickable. */
+.bible-flow .footnote-link,
+.bible-flow sup.footnote-ref {
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+/* Block-id rendering varies by Obsidian version. Cover common selectors. */
+.bible-flow .markdown-rendered .block-id,
+.bible-flow .markdown-rendered span[id^="^v"],
+.bible-flow .markdown-rendered .cm-blockid {
+  font-size: 0.65em;
+  opacity: 0.3;
+  vertical-align: super;
+  margin-inline-start: 0.2em;
+}
+
+/* ===========================================================================
+ * 5. Poetry: `.el-blockquote` is block by default; just style the
+ *    blockquote itself.
+ * ========================================================================= */
+
+.bible-flow blockquote {
+  margin-block: 0.15em;
+  padding-block: 0.05em;
+  padding-inline-start: 0.9em;
+  border-left-width: 2px;
+  border-left-color: var(--text-faint);
+  background: transparent;
+}
+
+.bible-flow blockquote p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* ===========================================================================
+ * 6. Live preview / source mode (CodeMirror) — minimal tightening only.
+ * ========================================================================= */
+
+.bible-flow.markdown-source-view.mod-cm6 .cm-line {
+  line-height: 1.6;
+}

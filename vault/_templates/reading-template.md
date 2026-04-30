@@ -2,51 +2,23 @@
 type: reading
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-date: YYYY-MM-DD
-passage:
+passages: []
 passage_links: []
 status: prep
 tags: []
 ---
 
-# YYYY-MM-DD — Passage
+# Reading
 
-## Summary
+## [[bible/{Code}/{NN}#^v{N}|{Book Ch:Vs–Vs}]]
 
-## Entities
+### Entities
 
-### People
+- **People:**
+- **Places:**
+- **Concepts:**
+- **Events:**
 
--
-
-### Places
-
--
-
-### Concepts
-
--
-
-### Events
-
--
-
-## Cross-references
-
--
-
-## Themes
-
--
-
-## Questions to carry into the reading
-
--
-
----
-
-## During reading
-
-## After reading
+### Notes
 
 ## Connections back to prior notes

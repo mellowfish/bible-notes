@@ -7,10 +7,6 @@ tags: []
 era:
 ---
 
-# Name
-
-> One-sentence identification (who this is, why they matter at a glance).
-
 ## Key passages
 
 -

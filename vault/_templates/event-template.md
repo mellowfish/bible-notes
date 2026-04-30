@@ -9,10 +9,6 @@ where:
 participants: []
 ---
 
-# Event Name
-
-> One-sentence summary.
-
 ## Key passages
 
 -

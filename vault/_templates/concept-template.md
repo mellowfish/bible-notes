@@ -6,10 +6,6 @@ aliases: []
 tags: []
 ---
 
-# Concept Name
-
-> One-sentence definition or scope.
-
 ## Key passages
 
 -
